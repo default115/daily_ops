@@ -21,17 +21,14 @@
     -webkit-font-smoothing: antialiased;
     overscroll-behavior: none;
   }
-  .grid-bg {
-    position: fixed; inset: 0; opacity: 0.03; pointer-events: none; z-index: 0;
-    background-image: linear-gradient(#30a14e 1px, transparent 1px), linear-gradient(90deg, #30a14e 1px, transparent 1px);
-    background-size: 40px 40px;
-  }
+  .grid-bg { position: fixed; inset: 0; opacity: 0.03; pointer-events: none; z-index: 0; background-image: linear-gradient(#30a14e 1px, transparent 1px), linear-gradient(90deg, #30a14e 1px, transparent 1px); background-size: 40px 40px; }
   .container { max-width: 520px; margin: 0 auto; position: relative; z-index: 1; }
 
-  .header { text-align: center; margin-bottom: 28px; }
+  .header { text-align: center; margin-bottom: 28px; position: relative; }
   .header-tag { font-size: 9px; letter-spacing: 5px; color: #30a14e; margin-bottom: 6px; font-weight: 700; }
   .header h1 { font-size: 26px; font-weight: 800; color: #e6edf3; letter-spacing: -0.5px; }
   .header-sub { font-size: 11px; color: #484f58; margin-top: 6px; letter-spacing: 1px; }
+  .version-tag { position: absolute; top: 0; right: 0; font-size: 9px; color: #30363d; padding: 4px 8px; cursor: pointer; }
 
   .card { background: rgba(22,27,34,0.85); border: 1px solid #21262d; border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
 
@@ -59,25 +56,50 @@
 
   .section-label { font-size: 9px; letter-spacing: 3px; color: #484f58; margin-bottom: 10px; font-weight: 700; border-bottom: 1px solid #21262d; padding-bottom: 7px; }
 
-  .mission { background: rgba(22,27,34,0.85); border: 1px solid #21262d; border-radius: 10px; margin-bottom: 10px; overflow: hidden; transition: all 0.3s ease; cursor: pointer; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-  .mission.completed { background: rgba(35,134,54,0.08); border-color: #238636; opacity: 0.6; }
+  .mission { background: rgba(22,27,34,0.85); border: 1px solid #21262d; border-radius: 10px; margin-bottom: 10px; overflow: hidden; transition: all 0.3s ease; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .mission.completed { background: rgba(35,134,54,0.08); border-color: #238636; }
+  .mission.completed.has-note { opacity: 1; }
+  .mission.completed:not(.has-note) { opacity: 0.6; }
   .mission.bonus:not(.completed) { border-color: #f0883e; }
-  .mission-inner { padding: 13px 14px; display: flex; align-items: flex-start; gap: 11px; }
+  .mission-inner { padding: 13px 14px; display: flex; align-items: flex-start; gap: 11px; cursor: pointer; }
   .mission-icon { width: 30px; height: 30px; border-radius: 6px; background: #161b22; border: 1px solid #30363d; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; margin-top: 1px; color: #484f58; transition: all 0.3s; }
   .mission.completed .mission-icon { background: #238636; border-color: #238636; color: #fff; }
   .mission-body { flex: 1; min-width: 0; }
-  .mission-tags { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+  .mission-tags { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; flex-wrap: wrap; }
   .mission-cat { font-size: 9px; letter-spacing: 1.5px; color: #30a14e; font-weight: 700; }
   .mission.bonus .mission-cat { color: #f0883e; }
   .mission-tier { font-size: 9px; color: #484f58; background: #161b22; padding: 1px 5px; border-radius: 3px; }
+  .note-badge { font-size: 9px; color: #58a6ff; background: rgba(88,166,255,0.1); padding: 1px 5px; border-radius: 3px; }
   .mission-text { font-size: 12px; line-height: 1.55; color: #c9d1d9; }
   .mission-text.clamped { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .mission-xp { font-size: 12px; font-weight: 700; color: #30a14e; flex-shrink: 0; padding-top: 2px; }
   .mission.bonus .mission-xp { color: #f0883e; }
 
-  .mission-actions { padding: 0 14px 13px; display: flex; justify-content: flex-end; }
-  .btn-complete { background: linear-gradient(135deg, #238636, #2ea043); color: #fff; border: none; border-radius: 6px; padding: 9px 22px; font-size: 11px; font-weight: 700; letter-spacing: 1px; cursor: pointer; font-family: inherit; }
-  .btn-complete:active { transform: scale(0.95); box-shadow: 0 0 20px rgba(46,160,67,0.3); }
+  .mission-actions { padding: 0 14px 13px; display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+  .btn { border: none; border-radius: 6px; padding: 9px 18px; font-size: 11px; font-weight: 700; letter-spacing: 1px; cursor: pointer; font-family: inherit; }
+  .btn-complete { background: linear-gradient(135deg, #238636, #2ea043); color: #fff; }
+  .btn-complete:active { transform: scale(0.95); }
+  .btn-note { background: rgba(88,166,255,0.1); color: #58a6ff; border: 1px solid rgba(88,166,255,0.3); }
+  .btn-note:active { background: rgba(88,166,255,0.2); }
+
+  /* Note display in mission */
+  .note-display { padding: 0 14px 13px; }
+  .note-block { background: rgba(13,17,23,0.6); border-left: 2px solid #58a6ff; border-radius: 0 6px 6px 0; padding: 10px 12px; font-size: 12px; line-height: 1.5; color: #8b949e; white-space: pre-wrap; word-wrap: break-word; }
+  .note-meta { display: flex; justify-content: space-between; margin-top: 6px; font-size: 9px; color: #484f58; letter-spacing: 1px; }
+
+  /* Modal for note input */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: none; align-items: flex-end; justify-content: center; padding: 16px; backdrop-filter: blur(4px); }
+  .modal-overlay.show { display: flex; }
+  .modal { background: #0d1117; border: 1px solid #30363d; border-radius: 12px; width: 100%; max-width: 500px; padding: 18px; animation: slideUp 0.25s ease; }
+  @keyframes slideUp { 0%{transform:translateY(20px);opacity:0} 100%{transform:translateY(0);opacity:1} }
+  .modal-title { font-size: 11px; letter-spacing: 2px; color: #30a14e; font-weight: 700; margin-bottom: 6px; }
+  .modal-mission { font-size: 12px; color: #8b949e; line-height: 1.5; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid #21262d; }
+  .modal textarea { width: 100%; min-height: 120px; background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 12px; color: #c9d1d9; font-family: inherit; font-size: 13px; line-height: 1.5; resize: vertical; }
+  .modal textarea:focus { outline: none; border-color: #58a6ff; }
+  .modal-prompts { font-size: 10px; color: #484f58; margin-top: 8px; line-height: 1.6; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end; }
+  .btn-secondary { background: transparent; color: #8b949e; border: 1px solid #30363d; }
+  .btn-primary { background: linear-gradient(135deg, #1f6feb, #58a6ff); color: #fff; }
 
   .tabs { display: flex; gap: 0; margin-bottom: 18px; border: 1px solid #21262d; border-radius: 8px; overflow: hidden; }
   .tab { flex: 1; padding: 10px 4px; text-align: center; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: #484f58; background: rgba(22,27,34,0.6); cursor: pointer; transition: all 0.2s; border: none; font-family: inherit; -webkit-tap-highlight-color: transparent; }
@@ -101,15 +123,22 @@
 
   .history-day { margin-bottom: 16px; }
   .history-date { font-size: 10px; color: #484f58; letter-spacing: 2px; font-weight: 700; margin-bottom: 6px; }
-  .history-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: rgba(22,27,34,0.6); border: 1px solid #161b22; border-radius: 6px; margin-bottom: 4px; gap: 10px; }
-  .history-item .h-left { flex: 1; min-width: 0; }
+  .history-item { padding: 10px 12px; background: rgba(22,27,34,0.6); border: 1px solid #161b22; border-radius: 6px; margin-bottom: 6px; }
+  .history-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
   .history-item .h-cat { font-size: 9px; color: #30a14e; letter-spacing: 1px; font-weight: 700; }
-  .history-item .h-text { font-size: 11px; color: #8b949e; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .history-item .h-text { font-size: 11px; color: #8b949e; margin-top: 3px; line-height: 1.5; }
   .history-item .h-xp { font-size: 12px; font-weight: 700; color: #30a14e; flex-shrink: 0; }
+  .history-note { margin-top: 8px; padding: 8px 10px; background: rgba(13,17,23,0.6); border-left: 2px solid #58a6ff; border-radius: 0 4px 4px 0; font-size: 11px; line-height: 1.5; color: #8b949e; white-space: pre-wrap; word-wrap: break-word; }
+  .empty-state { text-align: center; padding: 40px 16px; color: #30363d; font-size: 12px; }
+
+  /* Settings menu */
+  .settings-actions { display: flex; flex-direction: column; gap: 8px; }
+  .setting-btn { background: rgba(22,27,34,0.6); border: 1px solid #21262d; border-radius: 8px; padding: 12px 14px; color: #c9d1d9; font-family: inherit; font-size: 12px; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+  .setting-btn:active { background: rgba(48,161,78,0.08); }
+  .setting-btn .arrow { color: #484f58; }
 
   .footer { text-align: center; margin-top: 28px; padding: 14px 0; border-top: 1px solid #161b22; }
   .footer-quote { font-size: 10px; color: #262a30; font-style: italic; line-height: 1.6; }
-  .empty-state { text-align: center; padding: 40px 16px; color: #30363d; font-size: 12px; }
   .hidden { display: none !important; }
 </style>
 </head>
@@ -120,12 +149,14 @@
     <div class="header-tag">SOCIAL INTELLIGENCE</div>
     <h1>DAILY OPS</h1>
     <div class="header-sub" id="header-sub"></div>
+    <div class="version-tag" onclick="switchTab('settings')">v1.1</div>
   </div>
 
   <div class="tabs">
-    <button class="tab active" data-tab="missions" onclick="switchTab('missions')">MISSIONS</button>
+    <button class="tab active" data-tab="missions" onclick="switchTab('missions')">OPS</button>
     <button class="tab" data-tab="stats" onclick="switchTab('stats')">STATS</button>
-    <button class="tab" data-tab="history" onclick="switchTab('history')">HISTORY</button>
+    <button class="tab" data-tab="history" onclick="switchTab('history')">LOG</button>
+    <button class="tab" data-tab="settings" onclick="switchTab('settings')">⚙</button>
   </div>
 
   <div class="page active" id="page-missions">
@@ -149,8 +180,45 @@
     <div id="history-list"></div>
   </div>
 
+  <div class="page" id="page-settings">
+    <div class="section-label">DATA</div>
+    <div class="settings-actions">
+      <button class="setting-btn" onclick="exportData()">
+        <span>Export progress (.json backup)</span><span class="arrow">→</span>
+      </button>
+      <button class="setting-btn" onclick="document.getElementById('import-file').click()">
+        <span>Import progress from backup</span><span class="arrow">→</span>
+      </button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+      <button class="setting-btn" onclick="resetData()" style="color:#f85149;border-color:rgba(248,81,73,0.3)">
+        <span>Reset all progress</span><span class="arrow">→</span>
+      </button>
+    </div>
+    <div style="margin-top:24px" class="section-label">ABOUT</div>
+    <div style="font-size:11px;color:#8b949e;line-height:1.7;padding:0 4px">
+      Daily Ops v1.1 — A gamified social intelligence trainer.<br><br>
+      Your data lives only on this device. Export regularly to back up. Updates push automatically when the source file is updated.
+    </div>
+  </div>
+
   <div class="footer">
     <div class="footer-quote">"The person who speaks with economy and listens with intent<br>becomes the center of gravity in any room."</div>
+  </div>
+</div>
+
+<!-- Note modal -->
+<div class="modal-overlay" id="note-modal">
+  <div class="modal">
+    <div class="modal-title">FIELD NOTE</div>
+    <div class="modal-mission" id="modal-mission-text"></div>
+    <textarea id="note-text" placeholder="What happened? Who was involved? What worked? What didn't?"></textarea>
+    <div class="modal-prompts">
+      Prompts: Who was in the room? · What did you actually do? · What was their reaction? · What would you do differently?
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeNoteModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNote()">Save Note</button>
+    </div>
   </div>
 </div>
 
@@ -172,10 +240,11 @@ try{state=JSON.parse(localStorage.getItem(STORAGE))}catch{}
 function initDay(){
   const p=state||{};
   const wd=(()=>{if(!p.lastCompletedDay)return false;const l=new Date(p.lastCompletedDay+'T12:00:00');const t=new Date(getDayKey()+'T12:00:00');return Math.round((t-l)/86400000)===1})();
-  state={totalXP:p.totalXP||0,streak:wd?(p.streak||0):(p.lastCompletedDay===getDayKey()?(p.streak||0):0),lastCompletedDay:p.lastCompletedDay||null,completedToday:(p.dayKey===getDayKey())?(p.completedToday||[]):[],totalOps:p.totalOps||0,dayKey:getDayKey(),history:p.history||[],categoryXP:p.categoryXP||{presence:0,voice:0,connection:0,edge:0}};
+  state={totalXP:p.totalXP||0,streak:wd?(p.streak||0):(p.lastCompletedDay===getDayKey()?(p.streak||0):0),lastCompletedDay:p.lastCompletedDay||null,completedToday:(p.dayKey===getDayKey())?(p.completedToday||[]):[],totalOps:p.totalOps||0,dayKey:getDayKey(),history:p.history||[],categoryXP:p.categoryXP||{presence:0,voice:0,connection:0,edge:0},notes:p.notes||{}};
   save();
 }
 if(!state||state.dayKey!==getDayKey())initDay();
+if(!state.notes)state.notes={};
 function save(){try{localStorage.setItem(STORAGE,JSON.stringify(state))}catch{}}
 
 function generateMissions(){
@@ -205,15 +274,66 @@ function render(){
   const container=document.getElementById('missions');container.innerHTML='';
   missions.forEach((m,idx)=>{
     const completed=state.completedToday.includes(m.id),expanded=expandedIdx===idx,cat=POOLS[m.category];
+    const note=state.notes[m.id];
     const div=document.createElement('div');
-    div.className=`mission${completed?' completed':''}${m.isBonus?' bonus':''}`;
-    div.innerHTML=`<div class="mission-inner"><div class="mission-icon">${completed?'✓':cat.icon}</div><div class="mission-body"><div class="mission-tags"><span class="mission-cat">${m.isBonus?'⚡ BONUS':cat.label}</span><span class="mission-tier">T${m.tier}</span></div><div class="mission-text${expanded?'':' clamped'}">${m.text}</div></div><div class="mission-xp">+${m.xp}</div></div>${expanded&&!completed?`<div class="mission-actions"><button class="btn-complete" data-idx="${idx}">MISSION COMPLETE</button></div>`:''}`;
+    div.className=`mission${completed?' completed':''}${m.isBonus?' bonus':''}${note?' has-note':''}`;
+    let actionsHTML='';
+    if(expanded){
+      if(!completed){
+        actionsHTML=`<div class="mission-actions"><button class="btn btn-complete" onclick="completeMissionAndPromptNote('${m.id}')">MISSION COMPLETE</button></div>`;
+      } else {
+        actionsHTML=`<div class="mission-actions"><button class="btn btn-note" onclick="openNoteModal('${m.id}')">${note?'✎ EDIT NOTE':'+ ADD NOTE'}</button></div>`;
+      }
+    }
+    let noteHTML='';
+    if(expanded && note){
+      noteHTML=`<div class="note-display"><div class="note-block">${escapeHTML(note.text)}</div><div class="note-meta"><span>FIELD NOTE</span><span>${note.timestamp||''}</span></div></div>`;
+    }
+    div.innerHTML=`<div class="mission-inner"><div class="mission-icon">${completed?'✓':cat.icon}</div><div class="mission-body"><div class="mission-tags"><span class="mission-cat">${m.isBonus?'⚡ BONUS':cat.label}</span><span class="mission-tier">T${m.tier}</span>${note?'<span class="note-badge">✎ NOTE</span>':''}</div><div class="mission-text${expanded?'':' clamped'}">${m.text}</div></div><div class="mission-xp">+${m.xp}</div></div>${noteHTML}${actionsHTML}`;
     div.querySelector('.mission-inner').onclick=()=>{expandedIdx=expanded?null:idx;render()};
-    const btn=div.querySelector('.btn-complete');
-    if(btn)btn.onclick=e=>{e.stopPropagation();completeMission(m)};
     container.appendChild(div);
   });
   document.getElementById('all-done').classList.toggle('hidden',done<missions.length);
+}
+
+function escapeHTML(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+let pendingNoteMissionId=null;
+function completeMissionAndPromptNote(missionId){
+  const m=missions.find(x=>x.id===missionId);
+  if(!m||state.completedToday.includes(m.id))return;
+  completeMission(m);
+  // Auto-open note modal after completion
+  setTimeout(()=>openNoteModal(m.id),300);
+}
+
+function openNoteModal(missionId){
+  pendingNoteMissionId=missionId;
+  // Find mission in missions or history
+  let m=missions.find(x=>x.id===missionId);
+  let missionText=m?m.text:state.history.find(h=>h.id===missionId)?.text||'';
+  document.getElementById('modal-mission-text').textContent=missionText;
+  document.getElementById('note-text').value=state.notes[missionId]?.text||'';
+  document.getElementById('note-modal').classList.add('show');
+  setTimeout(()=>document.getElementById('note-text').focus(),100);
+}
+function closeNoteModal(){
+  document.getElementById('note-modal').classList.remove('show');
+  pendingNoteMissionId=null;
+}
+function saveNote(){
+  if(!pendingNoteMissionId)return;
+  const text=document.getElementById('note-text').value.trim();
+  if(text){
+    const ts=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    state.notes[pendingNoteMissionId]={text,timestamp:ts,savedAt:Date.now()};
+  } else {
+    delete state.notes[pendingNoteMissionId];
+  }
+  save();
+  closeNoteModal();
+  render();
+  if(document.getElementById('page-history').classList.contains('active'))renderHistory();
 }
 
 function completeMission(m){
@@ -227,8 +347,8 @@ function completeMission(m){
   if(isNew)state.streak=wd?state.streak+1:1;
   if(!state.categoryXP)state.categoryXP={presence:0,voice:0,connection:0,edge:0};
   state.categoryXP[m.category]=(state.categoryXP[m.category]||0)+xp;
-  state.history.push({day:getDayKey(),cat:m.category,text:m.text,xp:xp});
-  if(state.history.length>200)state.history=state.history.slice(-200);
+  state.history.push({id:m.id,day:getDayKey(),cat:m.category,text:m.text,xp:xp});
+  if(state.history.length>500)state.history=state.history.slice(-500);
   save();render();
   const el=document.getElementById('xp-display');
   if(el){const f=document.createElement('span');f.className='xp-flash';f.textContent=`+${xp}`;el.appendChild(f);setTimeout(()=>f.remove(),1300)}
@@ -239,7 +359,8 @@ function completeMission(m){
 function renderStats(){
   const cx=state.categoryXP||{presence:0,voice:0,connection:0,edge:0};
   const mx=Math.max(...Object.values(cx),1),rank=getRank(state.totalXP);
-  document.getElementById('stats-detail').innerHTML=`<div class="section-label" style="border:none;margin-bottom:12px;padding:0">CATEGORY BREAKDOWN</div>${Object.entries(POOLS).map(([k,p])=>{const xp=cx[k]||0;return`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:10px;color:#8b949e;letter-spacing:1px">${p.icon} ${p.label}</span><span style="font-size:11px;font-weight:700;color:#e6edf3">${xp} XP</span></div><div class="progress-track"><div class="progress-fill" style="width:${(xp/mx)*100}%"></div></div></div>`}).join('')}<div style="margin-top:16px;padding-top:12px;border-top:1px solid #21262d;display:flex;justify-content:space-between"><span style="font-size:10px;color:#484f58">Total missions</span><span style="font-size:13px;font-weight:700;color:#e6edf3">${state.totalOps}</span></div><div style="display:flex;justify-content:space-between;margin-top:6px"><span style="font-size:10px;color:#484f58">Current streak</span><span style="font-size:13px;font-weight:700;color:#f0883e">${state.streak} days</span></div>`;
+  const noteCount=Object.keys(state.notes||{}).length;
+  document.getElementById('stats-detail').innerHTML=`<div class="section-label" style="border:none;margin-bottom:12px;padding:0">CATEGORY BREAKDOWN</div>${Object.entries(POOLS).map(([k,p])=>{const xp=cx[k]||0;return`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:10px;color:#8b949e;letter-spacing:1px">${p.icon} ${p.label}</span><span style="font-size:11px;font-weight:700;color:#e6edf3">${xp} XP</span></div><div class="progress-track"><div class="progress-fill" style="width:${(xp/mx)*100}%"></div></div></div>`}).join('')}<div style="margin-top:16px;padding-top:12px;border-top:1px solid #21262d;display:flex;justify-content:space-between"><span style="font-size:10px;color:#484f58">Total missions</span><span style="font-size:13px;font-weight:700;color:#e6edf3">${state.totalOps}</span></div><div style="display:flex;justify-content:space-between;margin-top:6px"><span style="font-size:10px;color:#484f58">Current streak</span><span style="font-size:13px;font-weight:700;color:#f0883e">${state.streak} days</span></div><div style="display:flex;justify-content:space-between;margin-top:6px"><span style="font-size:10px;color:#484f58">Field notes</span><span style="font-size:13px;font-weight:700;color:#58a6ff">${noteCount}</span></div>`;
   document.getElementById('rank-ladder').innerHTML=`<div class="rank-ladder-title">RANK LADDER</div>${RANKS.map(r=>`<div class="rank-row-item ${rank.name===r.name?'active':''} ${state.totalXP<r.minXP?'locked':''}"><span><span style="margin-right:8px">${r.icon}</span><span class="r-name">${r.name}</span></span><span class="r-xp">${r.minXP} XP</span></div>`).join('')}`;
 }
 
@@ -247,7 +368,45 @@ function renderHistory(){
   const hist=[...(state.history||[])].reverse();
   if(!hist.length){document.getElementById('history-list').innerHTML='<div class="empty-state">No missions completed yet.<br>Get after it.</div>';return}
   const g={};hist.forEach(h=>{if(!g[h.day])g[h.day]=[];g[h.day].push(h)});
-  document.getElementById('history-list').innerHTML=Object.entries(g).map(([day,items])=>`<div class="history-day"><div class="history-date">${day}</div>${items.map(i=>`<div class="history-item"><div class="h-left"><div class="h-cat">${POOLS[i.cat]?.icon||''} ${POOLS[i.cat]?.label||i.cat}</div><div class="h-text">${i.text}</div></div><div class="h-xp">+${i.xp}</div></div>`).join('')}</div>`).join('');
+  document.getElementById('history-list').innerHTML=Object.entries(g).map(([day,items])=>`<div class="history-day"><div class="history-date">${day}</div>${items.map(i=>{
+    const note=state.notes[i.id];
+    return `<div class="history-item"><div class="history-row"><div style="flex:1;min-width:0"><div class="h-cat">${POOLS[i.cat]?.icon||''} ${POOLS[i.cat]?.label||i.cat}</div><div class="h-text">${i.text}</div></div><div class="h-xp">+${i.xp}</div></div>${note?`<div class="history-note">${escapeHTML(note.text)}</div>`:''}<div style="margin-top:8px"><button class="btn btn-note" style="font-size:10px;padding:6px 12px" onclick="openNoteModal('${i.id}')">${note?'✎ EDIT NOTE':'+ ADD NOTE'}</button></div></div>`;
+  }).join('')}</div>`).join('');
+}
+
+function exportData(){
+  const data=JSON.stringify(state,null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`daily-ops-backup-${getDayKey()}.json`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function importData(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const imported=JSON.parse(ev.target.result);
+      if(confirm('This will replace all current progress. Continue?')){
+        state=imported;
+        if(!state.notes)state.notes={};
+        save();render();renderStats();renderHistory();
+        alert('Progress restored.');
+      }
+    }catch(err){alert('Invalid backup file.')}
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+function resetData(){
+  if(confirm('Reset ALL progress? This cannot be undone.')){
+    if(confirm('Are you absolutely sure? Export a backup first if you want one.')){
+      localStorage.removeItem(STORAGE);
+      location.reload();
+    }
+  }
 }
 
 render();
