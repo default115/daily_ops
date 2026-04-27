@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Daily Ops">
+<meta name="theme-color" content="#0a0c10">
+<title>Social Intel — Daily Ops</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { height: 100%; }
+  body {
+    font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+    background: linear-gradient(170deg, #0a0c10 0%, #111318 40%, #0d1117 100%);
+    color: #c9d1d9; min-height: 100vh;
+    padding: max(env(safe-area-inset-top, 20px), 20px) 16px calc(env(safe-area-inset-bottom, 20px) + 40px);
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+  }
+  .grid-bg {
+    position: fixed; inset: 0; opacity: 0.03; pointer-events: none; z-index: 0;
+    background-image: linear-gradient(#30a14e 1px, transparent 1px), linear-gradient(90deg, #30a14e 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .container { max-width: 520px; margin: 0 auto; position: relative; z-index: 1; }
+
+  .header { text-align: center; margin-bottom: 28px; }
+  .header-tag { font-size: 9px; letter-spacing: 5px; color: #30a14e; margin-bottom: 6px; font-weight: 700; }
+  .header h1 { font-size: 26px; font-weight: 800; color: #e6edf3; letter-spacing: -0.5px; }
+  .header-sub { font-size: 11px; color: #484f58; margin-top: 6px; letter-spacing: 1px; }
+
+  .card { background: rgba(22,27,34,0.85); border: 1px solid #21262d; border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+
+  .rank-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .rank-label { font-size: 10px; color: #484f58; letter-spacing: 2px; }
+  .rank-name { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+  .rank-name .icon { font-size: 15px; color: #30a14e; }
+  .rank-name .name { font-size: 15px; font-weight: 700; color: #e6edf3; }
+  .xp-value { font-size: 22px; font-weight: 800; color: #e6edf3; position: relative; text-align: right; }
+  .xp-flash { position: absolute; right: -6px; top: -18px; font-size: 13px; color: #30a14e; font-weight: 700; animation: fadeUp 1.2s ease-out forwards; pointer-events: none; white-space: nowrap; }
+  @keyframes fadeUp { 0%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-22px)} }
+  @keyframes rankUp { 0%{transform:scale(1)} 50%{transform:scale(1.15);color:#30a14e} 100%{transform:scale(1)} }
+  .rank-up-anim { animation: rankUp 0.6s ease; }
+
+  .progress-track { height: 5px; background: #161b22; border-radius: 3px; overflow: hidden; border: 1px solid #21262d; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #238636, #30a14e); border-radius: 3px; transition: width 0.6s ease; }
+  .progress-hint { font-size: 9px; color: #484f58; margin-top: 4px; text-align: right; }
+
+  .stats-row { display: flex; gap: 8px; margin-bottom: 18px; }
+  .stat-card { flex: 1; background: rgba(22,27,34,0.85); border: 1px solid #21262d; border-radius: 10px; padding: 10px 6px; text-align: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .stat-big { font-size: 22px; font-weight: 800; color: #e6edf3; }
+  .stat-big.fire { color: #f0883e; }
+  .stat-label { font-size: 9px; color: #484f58; letter-spacing: 1.5px; margin-top: 2px; }
+  .streak-bonus { font-size: 8px; color: #f0883e; margin-top: 3px; }
+
+  .section-label { font-size: 9px; letter-spacing: 3px; color: #484f58; margin-bottom: 10px; font-weight: 700; border-bottom: 1px solid #21262d; padding-bottom: 7px; }
+
+  .mission { background: rgba(22,27,34,0.85); border: 1px solid #21262d; border-radius: 10px; margin-bottom: 10px; overflow: hidden; transition: all 0.3s ease; cursor: pointer; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .mission.completed { background: rgba(35,134,54,0.08); border-color: #238636; opacity: 0.6; }
+  .mission.bonus:not(.completed) { border-color: #f0883e; }
+  .mission-inner { padding: 13px 14px; display: flex; align-items: flex-start; gap: 11px; }
+  .mission-icon { width: 30px; height: 30px; border-radius: 6px; background: #161b22; border: 1px solid #30363d; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; margin-top: 1px; color: #484f58; transition: all 0.3s; }
+  .mission.completed .mission-icon { background: #238636; border-color: #238636; color: #fff; }
+  .mission-body { flex: 1; min-width: 0; }
+  .mission-tags { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+  .mission-cat { font-size: 9px; letter-spacing: 1.5px; color: #30a14e; font-weight: 700; }
+  .mission.bonus .mission-cat { color: #f0883e; }
+  .mission-tier { font-size: 9px; color: #484f58; background: #161b22; padding: 1px 5px; border-radius: 3px; }
+  .mission-text { font-size: 12px; line-height: 1.55; color: #c9d1d9; }
+  .mission-text.clamped { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .mission-xp { font-size: 12px; font-weight: 700; color: #30a14e; flex-shrink: 0; padding-top: 2px; }
+  .mission.bonus .mission-xp { color: #f0883e; }
+
+  .mission-actions { padding: 0 14px 13px; display: flex; justify-content: flex-end; }
+  .btn-complete { background: linear-gradient(135deg, #238636, #2ea043); color: #fff; border: none; border-radius: 6px; padding: 9px 22px; font-size: 11px; font-weight: 700; letter-spacing: 1px; cursor: pointer; font-family: inherit; }
+  .btn-complete:active { transform: scale(0.95); box-shadow: 0 0 20px rgba(46,160,67,0.3); }
+
+  .tabs { display: flex; gap: 0; margin-bottom: 18px; border: 1px solid #21262d; border-radius: 8px; overflow: hidden; }
+  .tab { flex: 1; padding: 10px 4px; text-align: center; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: #484f58; background: rgba(22,27,34,0.6); cursor: pointer; transition: all 0.2s; border: none; font-family: inherit; -webkit-tap-highlight-color: transparent; }
+  .tab.active { color: #e6edf3; background: rgba(48,161,78,0.12); }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .rank-ladder-title { font-size: 10px; color: #30a14e; letter-spacing: 2px; margin-bottom: 10px; font-weight: 700; }
+  .rank-row-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 0 5px 10px; border-left: 2px solid transparent; }
+  .rank-row-item.active { border-left-color: #30a14e; }
+  .rank-row-item.locked { opacity: 0.35; }
+  .rank-row-item .r-name { font-weight: 400; color: #8b949e; font-size: 12px; }
+  .rank-row-item.active .r-name { font-weight: 700; color: #e6edf3; }
+  .rank-row-item .r-xp { font-size: 10px; color: #484f58; }
+
+  .all-done { text-align: center; padding: 22px 16px; margin-top: 10px; background: rgba(35,134,54,0.06); border: 1px solid #238636; border-radius: 10px; }
+  .all-done .emoji { font-size: 26px; margin-bottom: 6px; }
+  .all-done .title { font-size: 13px; font-weight: 700; color: #30a14e; letter-spacing: 1px; }
+  .all-done .sub { font-size: 11px; color: #484f58; margin-top: 6px; line-height: 1.5; }
+
+  .history-day { margin-bottom: 16px; }
+  .history-date { font-size: 10px; color: #484f58; letter-spacing: 2px; font-weight: 700; margin-bottom: 6px; }
+  .history-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: rgba(22,27,34,0.6); border: 1px solid #161b22; border-radius: 6px; margin-bottom: 4px; gap: 10px; }
+  .history-item .h-left { flex: 1; min-width: 0; }
+  .history-item .h-cat { font-size: 9px; color: #30a14e; letter-spacing: 1px; font-weight: 700; }
+  .history-item .h-text { font-size: 11px; color: #8b949e; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .history-item .h-xp { font-size: 12px; font-weight: 700; color: #30a14e; flex-shrink: 0; }
+
+  .footer { text-align: center; margin-top: 28px; padding: 14px 0; border-top: 1px solid #161b22; }
+  .footer-quote { font-size: 10px; color: #262a30; font-style: italic; line-height: 1.6; }
+  .empty-state { text-align: center; padding: 40px 16px; color: #30363d; font-size: 12px; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="container">
+  <div class="header">
+    <div class="header-tag">SOCIAL INTELLIGENCE</div>
+    <h1>DAILY OPS</h1>
+    <div class="header-sub" id="header-sub"></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="missions" onclick="switchTab('missions')">MISSIONS</button>
+    <button class="tab" data-tab="stats" onclick="switchTab('stats')">STATS</button>
+    <button class="tab" data-tab="history" onclick="switchTab('history')">HISTORY</button>
+  </div>
+
+  <div class="page active" id="page-missions">
+    <div class="card" id="rank-card"></div>
+    <div class="stats-row" id="stats-row"></div>
+    <div class="section-label">TODAY'S MISSIONS</div>
+    <div id="missions"></div>
+    <div class="all-done hidden" id="all-done">
+      <div class="emoji">⚡</div>
+      <div class="title">ALL OPS COMPLETE</div>
+      <div class="sub">Come back tomorrow for new missions.<br>Consistency compounds.</div>
+    </div>
+  </div>
+
+  <div class="page" id="page-stats">
+    <div class="card" id="stats-detail"></div>
+    <div class="card" id="rank-ladder"></div>
+  </div>
+
+  <div class="page" id="page-history">
+    <div id="history-list"></div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-quote">"The person who speaks with economy and listens with intent<br>becomes the center of gravity in any room."</div>
+  </div>
+</div>
+
+<script>
+const POOLS={presence:{label:"PRESENCE",icon:"◉",challenges:[{text:"During your next conversation, maintain eye contact 80% of the time. Break naturally every 5–7 seconds.",xp:15,tier:1},{text:"Put your phone completely away in your next group interaction. No pocket checks. Be the only person fully present.",xp:20,tier:1},{text:"Let someone finish completely before responding. Count 1 full second of silence before you speak.",xp:20,tier:1},{text:"Mirror someone's body language subtly for 2 minutes. Match their posture, lean, or energy level.",xp:25,tier:2},{text:"Walk into a room and pause for 2 seconds at the doorway before moving. Own the space.",xp:25,tier:2},{text:"Sit with open posture during every meeting today — no crossed arms, no hunching, feet planted.",xp:20,tier:1},{text:"Before responding, silently repeat the person's last sentence in your head. Then respond.",xp:30,tier:2},{text:"Greet 3 people today by name with direct eye contact and a deliberate pause before speaking.",xp:20,tier:1},{text:"Stand with both feet planted, shoulders back, for every conversation today.",xp:15,tier:1},{text:"When entering a room, scan it for 2 seconds before engaging anyone. Read the room before joining it.",xp:25,tier:2}]},voice:{label:"VOICE & CONVICTION",icon:"◆",challenges:[{text:"Eliminate filler words ('um', 'like', 'you know') for one full conversation. Embrace the silence.",xp:25,tier:2},{text:"State one opinion today with zero hedging. No 'I think maybe.' Just say it.",xp:20,tier:1},{text:"Lower your vocal pitch in your next interaction. Speak from the chest. Slow down by 20%.",xp:25,tier:2},{text:"Give someone a genuine, specific compliment about something they DID, not how they look.",xp:15,tier:1},{text:"Tell a short story (30 sec max) with a clear beginning, tension, and punchline.",xp:30,tier:2},{text:"When asked 'how are you,' give a real, specific answer. Not 'good' — something with substance.",xp:15,tier:1},{text:"Disagree with someone respectfully. 'I see it differently — [your take].' No apology, no aggression.",xp:30,tier:2},{text:"End a conversation by being the one to leave first. 'Good talk.' Walk away with purpose.",xp:20,tier:1},{text:"Summarize someone's point back to them before responding. 'So what you're saying is...'",xp:25,tier:2},{text:"Use a 3-second pause before answering the next important question. Let the silence build weight.",xp:30,tier:2}]},connection:{label:"CONNECTION",icon:"◈",challenges:[{text:"Ask someone a question one level deeper. Not 'how's it going' — try 'what's been the best part of your week?'",xp:20,tier:1},{text:"Reference something someone told you previously. 'How did that [thing] turn out?' People remember who remembers.",xp:25,tier:2},{text:"Pull the quietest person into a group conversation. 'Hey [Name], what do you think?'",xp:30,tier:2},{text:"Give credit to someone publicly — in front of at least one other person.",xp:25,tier:2},{text:"Have a 2+ minute conversation with someone you normally just nod at. Learn one new thing.",xp:20,tier:1},{text:"Use someone's name 2–3 times naturally in a conversation. Woven in, not forced.",xp:15,tier:1},{text:"Offer to help someone with something small — unprompted. Not performative, just useful.",xp:20,tier:1},{text:"Sit with or stand near someone different at chow or break. Break your default orbit.",xp:25,tier:2},{text:"Ask a follow-up question that proves you were listening. Reference a specific detail.",xp:25,tier:2},{text:"Introduce two people who don't know each other well. Be the connector.",xp:30,tier:2}]},edge:{label:"EDGE CASES",icon:"◇",challenges:[{text:"Handle an awkward silence by NOT filling it. Let it sit 3 seconds. Then continue calmly.",xp:30,tier:2},{text:"If someone tries to get a reaction, respond with calm amusement. Smirk, don't snap.",xp:35,tier:3},{text:"Deliver a correction with zero softening but full respect. Direct, calm, no sugar coating.",xp:35,tier:3},{text:"Admit you don't know something openly. 'I don't know enough about that — tell me more.'",xp:25,tier:2},{text:"Read the emotional temperature of a room before entering a conversation. Adjust your energy.",xp:30,tier:2},{text:"If someone interrupts you, pause. Let them finish. 'As I was saying...' and continue.",xp:35,tier:3},{text:"Do something unexpected — dry joke in a serious moment, or go serious in a casual one. Range is charisma.",xp:30,tier:2},{text:"Apologize for something small — quickly, sincerely, no over-explaining. 'My bad. Fixed.'",xp:20,tier:1},{text:"Say no to something today without explaining why. 'No, I can't do that one.' Boundaries are power.",xp:35,tier:3},{text:"Hold frame during a tense moment. Don't change your tone or pace when someone else escalates.",xp:40,tier:3}]}};
+
+const RANKS=[{name:"UNRATED",minXP:0,icon:"—"},{name:"OBSERVER",minXP:50,icon:"●"},{name:"CONVERSANT",minXP:150,icon:"●●"},{name:"OPERATOR",minXP:350,icon:"●●●"},{name:"INFLUENCER",minXP:600,icon:"◆"},{name:"TACTICIAN",minXP:1000,icon:"◆◆"},{name:"COMMANDER",minXP:1500,icon:"◆◆◆"},{name:"APEX",minXP:2500,icon:"★"}];
+
+const getDayKey=()=>{const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+const getDaySeed=()=>{const s=getDayKey();let h=0;for(let i=0;i<s.length;i++)h=((h<<5)-h+s.charCodeAt(i))|0;return Math.abs(h)};
+function seededShuffle(a,seed){const c=[...a];let s=seed;for(let i=c.length-1;i>0;i--){s=(s*16807)%2147483647;const j=s%(i+1);[c[i],c[j]]=[c[j],c[i]]}return c}
+const getRank=xp=>{let r=RANKS[0];for(const x of RANKS)if(xp>=x.minXP)r=x;return r};
+const getNextRank=xp=>{for(const r of RANKS)if(xp<r.minXP)return r;return null};
+
+const STORAGE='social-intel-v2';
+let state;
+try{state=JSON.parse(localStorage.getItem(STORAGE))}catch{}
+
+function initDay(){
+  const p=state||{};
+  const wd=(()=>{if(!p.lastCompletedDay)return false;const l=new Date(p.lastCompletedDay+'T12:00:00');const t=new Date(getDayKey()+'T12:00:00');return Math.round((t-l)/86400000)===1})();
+  state={totalXP:p.totalXP||0,streak:wd?(p.streak||0):(p.lastCompletedDay===getDayKey()?(p.streak||0):0),lastCompletedDay:p.lastCompletedDay||null,completedToday:(p.dayKey===getDayKey())?(p.completedToday||[]):[],totalOps:p.totalOps||0,dayKey:getDayKey(),history:p.history||[],categoryXP:p.categoryXP||{presence:0,voice:0,connection:0,edge:0}};
+  save();
+}
+if(!state||state.dayKey!==getDayKey())initDay();
+function save(){try{localStorage.setItem(STORAGE,JSON.stringify(state))}catch{}}
+
+function generateMissions(){
+  const seed=getDaySeed(),cats=seededShuffle(Object.keys(POOLS),seed),missions=[];
+  for(let i=0;i<3;i++){const cat=cats[i%cats.length];const sh=seededShuffle(POOLS[cat].challenges,seed+i+1);missions.push({...sh[0],category:cat,id:`${getDayKey()}-${i}`})}
+  const bc=cats[3%cats.length],bp=POOLS[bc].challenges.filter(c=>c.tier>=2),bs=seededShuffle(bp.length?bp:POOLS[bc].challenges,seed+99);
+  missions.push({...bs[0],category:bc,id:`${getDayKey()}-bonus`,isBonus:true,xp:Math.round(bs[0].xp*1.5)});
+  return missions;
+}
+const missions=generateMissions();
+
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===`page-${tab}`));
+  if(tab==='stats')renderStats();if(tab==='history')renderHistory();
+}
+
+let expandedIdx=null;
+function render(){
+  const rank=getRank(state.totalXP),next=getNextRank(state.totalXP);
+  const pct=next?((state.totalXP-rank.minXP)/(next.minXP-rank.minXP))*100:100;
+  const done=state.completedToday.length;
+  document.getElementById('header-sub').textContent=`${getDayKey()}  ·  ${done}/${missions.length} COMPLETE`;
+  document.getElementById('rank-card').innerHTML=`<div class="rank-row"><div><div class="rank-label">RANK</div><div class="rank-name"><span class="icon">${rank.icon}</span><span class="name">${rank.name}</span></div></div><div><div class="rank-label" style="text-align:right">XP</div><div class="xp-value" id="xp-display">${state.totalXP}</div></div></div>${next?`<div class="progress-track"><div class="progress-fill" style="width:${Math.min(pct,100)}%"></div></div><div class="progress-hint">${next.minXP-state.totalXP} XP to ${next.name}</div>`:'<div class="progress-hint" style="color:#30a14e">MAX RANK</div>'}`;
+  document.getElementById('stats-row').innerHTML=`<div class="stat-card"><div class="stat-big ${state.streak>=3?'fire':''}">${state.streak}</div><div class="stat-label">STREAK${state.streak>=3?' 🔥':''}</div>${state.streak>=3?`<div class="streak-bonus">+${state.streak>=7?25:10}% XP</div>`:''}</div><div class="stat-card"><div class="stat-big">${state.totalOps}</div><div class="stat-label">TOTAL OPS</div></div><div class="stat-card"><div class="stat-big">${done}/${missions.length}</div><div class="stat-label">TODAY</div></div>`;
+
+  const container=document.getElementById('missions');container.innerHTML='';
+  missions.forEach((m,idx)=>{
+    const completed=state.completedToday.includes(m.id),expanded=expandedIdx===idx,cat=POOLS[m.category];
+    const div=document.createElement('div');
+    div.className=`mission${completed?' completed':''}${m.isBonus?' bonus':''}`;
+    div.innerHTML=`<div class="mission-inner"><div class="mission-icon">${completed?'✓':cat.icon}</div><div class="mission-body"><div class="mission-tags"><span class="mission-cat">${m.isBonus?'⚡ BONUS':cat.label}</span><span class="mission-tier">T${m.tier}</span></div><div class="mission-text${expanded?'':' clamped'}">${m.text}</div></div><div class="mission-xp">+${m.xp}</div></div>${expanded&&!completed?`<div class="mission-actions"><button class="btn-complete" data-idx="${idx}">MISSION COMPLETE</button></div>`:''}`;
+    div.querySelector('.mission-inner').onclick=()=>{expandedIdx=expanded?null:idx;render()};
+    const btn=div.querySelector('.btn-complete');
+    if(btn)btn.onclick=e=>{e.stopPropagation();completeMission(m)};
+    container.appendChild(div);
+  });
+  document.getElementById('all-done').classList.toggle('hidden',done<missions.length);
+}
+
+function completeMission(m){
+  if(state.completedToday.includes(m.id))return;
+  const prevRank=getRank(state.totalXP);
+  const bonus=state.streak>=7?1.25:state.streak>=3?1.1:1;
+  const xp=Math.round(m.xp*bonus);
+  const isNew=state.lastCompletedDay!==getDayKey();
+  const wd=(()=>{if(!state.lastCompletedDay)return false;const l=new Date(state.lastCompletedDay+'T12:00:00');const t=new Date(getDayKey()+'T12:00:00');return Math.round((t-l)/86400000)===1})();
+  state.totalXP+=xp;state.completedToday.push(m.id);state.lastCompletedDay=getDayKey();state.totalOps+=1;
+  if(isNew)state.streak=wd?state.streak+1:1;
+  if(!state.categoryXP)state.categoryXP={presence:0,voice:0,connection:0,edge:0};
+  state.categoryXP[m.category]=(state.categoryXP[m.category]||0)+xp;
+  state.history.push({day:getDayKey(),cat:m.category,text:m.text,xp:xp});
+  if(state.history.length>200)state.history=state.history.slice(-200);
+  save();render();
+  const el=document.getElementById('xp-display');
+  if(el){const f=document.createElement('span');f.className='xp-flash';f.textContent=`+${xp}`;el.appendChild(f);setTimeout(()=>f.remove(),1300)}
+  const nr=getRank(state.totalXP);
+  if(nr.name!==prevRank.name){const nm=document.querySelector('.rank-name .name');if(nm){nm.classList.add('rank-up-anim');setTimeout(()=>nm.classList.remove('rank-up-anim'),700)}}
+}
+
+function renderStats(){
+  const cx=state.categoryXP||{presence:0,voice:0,connection:0,edge:0};
+  const mx=Math.max(...Object.values(cx),1),rank=getRank(state.totalXP);
+  document.getElementById('stats-detail').innerHTML=`<div class="section-label" style="border:none;margin-bottom:12px;padding:0">CATEGORY BREAKDOWN</div>${Object.entries(POOLS).map(([k,p])=>{const xp=cx[k]||0;return`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:10px;color:#8b949e;letter-spacing:1px">${p.icon} ${p.label}</span><span style="font-size:11px;font-weight:700;color:#e6edf3">${xp} XP</span></div><div class="progress-track"><div class="progress-fill" style="width:${(xp/mx)*100}%"></div></div></div>`}).join('')}<div style="margin-top:16px;padding-top:12px;border-top:1px solid #21262d;display:flex;justify-content:space-between"><span style="font-size:10px;color:#484f58">Total missions</span><span style="font-size:13px;font-weight:700;color:#e6edf3">${state.totalOps}</span></div><div style="display:flex;justify-content:space-between;margin-top:6px"><span style="font-size:10px;color:#484f58">Current streak</span><span style="font-size:13px;font-weight:700;color:#f0883e">${state.streak} days</span></div>`;
+  document.getElementById('rank-ladder').innerHTML=`<div class="rank-ladder-title">RANK LADDER</div>${RANKS.map(r=>`<div class="rank-row-item ${rank.name===r.name?'active':''} ${state.totalXP<r.minXP?'locked':''}"><span><span style="margin-right:8px">${r.icon}</span><span class="r-name">${r.name}</span></span><span class="r-xp">${r.minXP} XP</span></div>`).join('')}`;
+}
+
+function renderHistory(){
+  const hist=[...(state.history||[])].reverse();
+  if(!hist.length){document.getElementById('history-list').innerHTML='<div class="empty-state">No missions completed yet.<br>Get after it.</div>';return}
+  const g={};hist.forEach(h=>{if(!g[h.day])g[h.day]=[];g[h.day].push(h)});
+  document.getElementById('history-list').innerHTML=Object.entries(g).map(([day,items])=>`<div class="history-day"><div class="history-date">${day}</div>${items.map(i=>`<div class="history-item"><div class="h-left"><div class="h-cat">${POOLS[i.cat]?.icon||''} ${POOLS[i.cat]?.label||i.cat}</div><div class="h-text">${i.text}</div></div><div class="h-xp">+${i.xp}</div></div>`).join('')}</div>`).join('');
+}
+
+render();
+</script>
+</body>
+</html>
